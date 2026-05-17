@@ -9,7 +9,16 @@
 /vendor
 .env
 .env.backup
+.env.bak
+.env.bak-*
 .env.production
+.env.*
+!.env.example
+.sql
+*.sql
+*.sql.gz
+/database/backups/*
+!/database/backups/.gitignore
 .phpactor.json
 .phpunit.result.cache
 Homestead.json
