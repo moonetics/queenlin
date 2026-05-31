@@ -2,12 +2,12 @@
 
 namespace App\Models;
 
+use App\Support\ScheduleMonth;
 use Database\Factories\ScheduleDispatchFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Carbon;
 
 #[Fillable([
     'month',
@@ -75,6 +75,6 @@ class ScheduleDispatch extends Model
 
     public static function monthDate(string $month): string
     {
-        return Carbon::createFromFormat('Y-m', $month)->startOfMonth()->toDateString();
+        return ScheduleMonth::parse($month)->toDateString();
     }
 }

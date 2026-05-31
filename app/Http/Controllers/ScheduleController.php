@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Event;
 use App\Models\ManualFullDate;
+use App\Support\ScheduleMonth;
 use Carbon\CarbonInterface;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
@@ -61,7 +62,11 @@ class ScheduleController extends Controller
         $month = $request->query('month');
 
         if (is_string($month) && preg_match('/^\d{4}-\d{2}$/', $month)) {
-            return Carbon::createFromFormat('Y-m', $month)->startOfMonth();
+            try {
+                return ScheduleMonth::parse($month);
+            } catch (\Throwable) {
+                //
+            }
         }
 
         return now()->startOfMonth();

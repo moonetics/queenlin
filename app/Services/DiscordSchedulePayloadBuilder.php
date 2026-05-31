@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Models\Event;
-use Illuminate\Support\Carbon;
+use App\Support\ScheduleMonth;
 use Illuminate\Support\Collection;
 
 class DiscordSchedulePayloadBuilder
@@ -13,7 +13,7 @@ class DiscordSchedulePayloadBuilder
      */
     public function forMonth(string $month): array
     {
-        $date = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
+        $date = ScheduleMonth::parse($month);
         $events = $this->eventsForMonth($month);
 
         return [
@@ -38,7 +38,7 @@ class DiscordSchedulePayloadBuilder
      */
     public function eventsForMonth(string $month): Collection
     {
-        $date = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
+        $date = ScheduleMonth::parse($month);
 
         return Event::query()
             ->published()

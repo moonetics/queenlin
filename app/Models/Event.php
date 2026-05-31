@@ -107,10 +107,9 @@ class Event extends Model
 
     public function scopeForMonth(Builder $query, CarbonInterface $month): Builder
     {
-        return $query->whereBetween('event_date', [
-            $month->copy()->startOfMonth()->toDateString(),
-            $month->copy()->endOfMonth()->toDateString(),
-        ]);
+        return $query
+            ->whereDate('event_date', '>=', $month->copy()->startOfMonth()->toDateString())
+            ->whereDate('event_date', '<=', $month->copy()->endOfMonth()->toDateString());
     }
 
     public function scopeForDate(Builder $query, CarbonInterface|string $date): Builder

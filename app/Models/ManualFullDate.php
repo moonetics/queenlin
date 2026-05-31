@@ -69,10 +69,8 @@ class ManualFullDate extends Model
     public static function statusesBetween(CarbonInterface|string $start, CarbonInterface|string $end): array
     {
         return self::query()
-            ->whereBetween('event_date', [
-                Carbon::parse($start)->toDateString(),
-                Carbon::parse($end)->toDateString(),
-            ])
+            ->whereDate('event_date', '>=', Carbon::parse($start)->toDateString())
+            ->whereDate('event_date', '<=', Carbon::parse($end)->toDateString())
             ->get(['event_date', 'status'])
             ->mapWithKeys(fn (self $dateStatus) => [
                 $dateStatus->event_date->toDateString() => $dateStatus->status,

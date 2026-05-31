@@ -7,6 +7,8 @@ use App\Models\ManualFullDate;
 use App\Models\ScheduleDispatch;
 use App\Models\User;
 use App\Services\Discord\DiscordMessageBuilder;
+use App\Services\DiscordSchedulePayloadBuilder;
+use App\Support\ScheduleMonth;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Date;
@@ -615,6 +617,29 @@ test('admin dashboard defaults to today and auto filters without reset button', 
         ->assertSee('Tandai Penuh')
         ->assertSee('Tandai Libur')
         ->assertSee('name="date" value="'.$date.'"', false);
+});
+
+test('admin schedule month parsing does not overflow from thirty first day', function () {
+    $user = User::factory()->create();
+
+    $this->travelTo('2026-05-31 10:00:00');
+
+    try {
+        $this->actingAs($user)
+            ->get(route('admin.events.index', ['month' => '2026-06']))
+            ->assertOk()
+            ->assertSee('June 2026')
+            ->assertSee('30 tanggal')
+            ->assertSee('01 Jun 2026')
+            ->assertDontSee('01 Jul 2026')
+            ->assertDontSee('01 July 2026');
+
+        expect(ScheduleDispatch::monthDate('2026-06'))->toBe('2026-06-01')
+            ->and(app(DiscordSchedulePayloadBuilder::class)->forMonth('2026-06')['title'])->toBe('Jadwal Queenlin - June 2026');
+        expect(fn () => ScheduleMonth::parse('2026-13'))->toThrow(InvalidArgumentException::class);
+    } finally {
+        $this->travelBack();
+    }
 });
 
 test('admin dashboard month dropdown shows event counts for each month', function () {

@@ -7,6 +7,7 @@ use App\Models\Event;
 use App\Models\EventDetailDispatch;
 use App\Models\ScheduleDispatch;
 use App\Models\User;
+use App\Support\ScheduleMonth;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use RuntimeException;
@@ -297,7 +298,7 @@ class DiscordDispatchService
     {
         return Event::query()
             ->published()
-            ->forMonth(Carbon::createFromFormat('Y-m', $month)->startOfMonth())
+            ->forMonth(ScheduleMonth::parse($month))
             ->exists();
     }
 

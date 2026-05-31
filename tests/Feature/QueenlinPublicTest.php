@@ -141,6 +141,20 @@ test('schedule calendar uses monday first weekday labels', function () {
         ->assertSee('Saturday, 09 May 2026');
 });
 
+test('public schedule month parsing does not overflow from thirty first day', function () {
+    $this->travelTo('2026-05-31 10:00:00');
+
+    try {
+        $this->get(route('schedule', ['month' => '2026-06']))
+            ->assertOk()
+            ->assertSee('value="2026-06" selected', false)
+            ->assertSee('Monday, 01 June 2026')
+            ->assertDontSee('Wednesday, 01 July 2026');
+    } finally {
+        $this->travelBack();
+    }
+});
+
 test('manual full date appears full on public schedule', function () {
     $date = now()->toDateString();
 

@@ -7,9 +7,9 @@ use App\Models\DiscordSetting;
 use App\Models\ScheduleDispatch;
 use App\Services\Discord\DiscordDispatchService;
 use App\Services\DiscordSchedulePayloadBuilder;
+use App\Support\ScheduleMonth;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
 use RuntimeException;
 
 class ScheduleDispatchController extends Controller
@@ -81,6 +81,6 @@ class ScheduleDispatchController extends Controller
 
     private function monthLabel(string $month): string
     {
-        return Carbon::createFromFormat('Y-m', $month)->translatedFormat('F Y');
+        return ScheduleMonth::parse($month)->translatedFormat('F Y');
     }
 }

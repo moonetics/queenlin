@@ -8,8 +8,9 @@ use App\Models\DiscordSetting;
 use App\Models\Event;
 use App\Models\ManualFullDate;
 use App\Models\ScheduleDispatch;
-use App\Services\DiscordSchedulePayloadBuilder;
 use App\Services\Discord\DiscordDispatchService;
+use App\Services\DiscordSchedulePayloadBuilder;
+use App\Support\ScheduleMonth;
 use Carbon\CarbonInterface;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -272,12 +273,12 @@ class EventController extends Controller
     {
         $month = (string) $request->query('month', now()->format('Y-m'));
 
-        return preg_match('/^\d{4}-\d{2}$/', $month) ? $month : now()->format('Y-m');
+        return preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $month) ? $month : now()->format('Y-m');
     }
 
     private function dateFromRequest(Request $request, string $month): string
     {
-        $monthDate = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
+        $monthDate = ScheduleMonth::parse($month);
         $fallback = $monthDate->isSameMonth(now()) ? now()->toDateString() : $monthDate->toDateString();
         $date = $request->query('date');
 
@@ -298,7 +299,7 @@ class EventController extends Controller
     {
         $start = now()->copy()->startOfMonth()->subMonths(2);
         $end = now()->copy()->startOfMonth()->addMonths(14);
-        $selected = Carbon::createFromFormat('Y-m', $selectedMonth)->startOfMonth();
+        $selected = ScheduleMonth::parse($selectedMonth);
 
         if ($selected->lt($start)) {
             $start = $selected->copy();
@@ -365,7 +366,7 @@ class EventController extends Controller
         $dateMonths = collect($dates)
             ->groupBy(fn (array $slot, string $date) => substr($date, 0, 7), preserveKeys: true)
             ->map(fn ($monthDates, string $month) => [
-                'label' => Carbon::createFromFormat('Y-m', $month)->translatedFormat('F Y'),
+                'label' => ScheduleMonth::parse($month)->translatedFormat('F Y'),
                 'dates' => $monthDates->all(),
             ])
             ->all();
@@ -408,7 +409,7 @@ class EventController extends Controller
      */
     private function dateFilterData(string $month): array
     {
-        $start = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
+        $start = ScheduleMonth::parse($month);
         $end = $start->copy()->endOfMonth();
         $manualDateStatuses = ManualFullDate::statusesBetween($start, $end);
         $eventsByDate = $this->eventsByDate($start, $end, null);
